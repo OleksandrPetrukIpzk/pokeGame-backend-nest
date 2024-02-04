@@ -2,7 +2,7 @@ import {Body, Controller, Delete, Get, Param, Post} from "@nestjs/common";
 import {UserService} from "./user.service";
 import {CreateUserDto} from "./dto/create-user-dto";
 import {ObjectId} from "mongoose";
-import {Potions} from "./schemas/user.schema";
+import {Potions, User} from "./schemas/user.schema";
 
 
 @Controller('/user')
@@ -11,69 +11,69 @@ export class UserController{
     constructor(private readonly userService: UserService) {
     }
     @Post()
-     create(@Body() dto: CreateUserDto){
+     create(@Body() dto: CreateUserDto): Promise<User>{
     return this.userService.create(dto)
     }
     @Delete(':id')
-     delete(@Param('id') id: ObjectId){
+     delete(@Param('id') id: ObjectId): Promise<ObjectId>{
         return this.userService.delete(id)
     }
     @Post('/password/:id')
-     changePassword(@Param('id') id: ObjectId, @Body() {password}: {password: string}) {
+     changePassword(@Param('id') id: ObjectId, @Body() {password}: {password: string}): Promise<User> {
         return this.userService.changePassword(id, password)
     }
     @Post('/name/:id')
-     changeName(@Param('id') id: ObjectId, @Body() {userName}: {userName: string}) {
+     changeName(@Param('id') id: ObjectId, @Body() {userName}: {userName: string}): Promise<User> {
         return this.userService.changeName(id, userName)
     }
     @Post('/email/:id')
-     changeEmail(@Param('id') id: ObjectId, @Body() {email}: {email: string}) {
+     changeEmail(@Param('id') id: ObjectId, @Body() {email}: {email: string}): Promise<User> {
         return this.userService.changeEmail(id, email)
     }
     @Post('/img/:id')
-     changeImg(@Param('id') id: ObjectId, @Body() {img}: {img: string}) {
+     changeImg(@Param('id') id: ObjectId, @Body() {img}: {img: string}): Promise<User> {
         return this.userService.changeImg(id, img)
     }
     @Post('/rang/:id')
-    changeRangById(@Param('id') id: ObjectId, @Body() {rang}: {rang: number}){
+    changeRangById(@Param('id') id: ObjectId, @Body() {rang}: {rang: number}) : Promise<User>{
         return this.userService.changeRangById(id, rang)
     }
     @Post('/pokemon/:id')
-     addPokemon(@Param('id') id: ObjectId, @Body() {idPokemon}: {idPokemon: string}){
+     addPokemon(@Param('id') id: ObjectId, @Body() {idPokemon}: {idPokemon: string}) : Promise<User>{
       return this.userService.addPokemon(id, idPokemon)
     }
     @Post('/removePokemon/:id')
-     removePokemon(@Param('id') id: ObjectId, @Body() {idPokemon}: {idPokemon: string}){
+     removePokemon(@Param('id') id: ObjectId, @Body() {idPokemon}: {idPokemon: string}) : Promise<User>{
         return this.userService.removePokemon(id, idPokemon)
     }
     @Post('/removePokemon/:id')
-     setPotions(@Param('id') id: ObjectId, @Body() {potion}: {potion: Potions}){
+     setPotions(@Param('id') id: ObjectId, @Body() {potion}: {potion: Potions}) : Promise<User>{
         return this.userService.setPotions(id, potion)
     }
     @Post('/stage/:id')
-     changeStage(@Param('id') id: ObjectId, @Body() {stage}: {stage: number}){
+     changeStage(@Param('id') id: ObjectId, @Body() {stage}: {stage: number}) : Promise<User>{
         return this.userService.changeStage(id, stage)
     }
     @Post('/select/:id')
-    changeCurrentPokemonById(@Param('id')id: ObjectId, @Body() {pokemonId}: {pokemonId: string }){
+    changeCurrentPokemonById(@Param('id')id: ObjectId, @Body() {pokemonId}: {pokemonId: string }) : Promise<User>{
         if(Number(pokemonId) <= 1200){
             return this.userService.changeCurrentPokemonById(id, pokemonId)
         }
     }
     @Post('/money/:id')
-     changeCountOfMoney(@Param('id')id: ObjectId, @Body() {money}: {money: number }){
+     changeCountOfMoney(@Param('id')id: ObjectId, @Body() {money}: {money: number }) : Promise<User>{
         return this.userService.changeCountOfMoney(id, money)
     }
     @Post('/achive/:id')
-    addAchivesById(@Param('id')id: ObjectId, @Body() {index}: {index: number }) {
+    addAchivesById(@Param('id')id: ObjectId, @Body() {index}: {index: number }) : Promise<User>{
         return this.userService.addAchivesById(id, index)
     }
     @Get()
-     getAll() {
+     getAll(): Promise<User[]> {
         return this.userService.getAll()
     }
     @Get(':id')
-     getUserById(@Param('id') id: ObjectId) {
+     getUserById(@Param('id') id: ObjectId): Promise<User> {
         return this.userService.getUserById(id)
     }
 

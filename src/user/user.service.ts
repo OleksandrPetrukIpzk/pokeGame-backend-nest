@@ -34,13 +34,13 @@ export class UserService {
         const user = await this.userModel.findByIdAndDelete(id);
         return user.id
     }
-    async changePassword(id: ObjectId, password: string) {
+    async changePassword(id: ObjectId, password: string): Promise<User> {
         const user = await this.userModel.findByIdAndDelete(id);
         user.password = password;
         user.save()
         return user
     }
-    async changeName(id: ObjectId, userName: string) {
+    async changeName(id: ObjectId, userName: string): Promise<User> {
         const isUnicalName = await this.userModel.findOne({'name': userName})
         if(isUnicalName === null){
             const user = await this.userModel.findById(id);
@@ -49,7 +49,7 @@ export class UserService {
             return user
         }
     }
-    async changeEmail(id: ObjectId, email: string) {
+    async changeEmail(id: ObjectId, email: string): Promise<User> {
         const isUnicalUser = await this.userModel.findOne({'email': email});
         if(isUnicalUser === null){
             const user = await this.userModel.findById(id);
@@ -59,13 +59,13 @@ export class UserService {
         }
 
     }
-    async changeImg(id: ObjectId, img: string) {
+    async changeImg(id: ObjectId, img: string): Promise<User> {
         const user = await this.userModel.findById(id);
         user.name = img;
         user.save()
         return user
     }
-    async changeRangById(id: ObjectId, rang: number){
+    async changeRangById(id: ObjectId, rang: number): Promise<User>{
         const user = await this.userModel.findById(id);
         if(user.rang === 0){
             return user
@@ -74,7 +74,7 @@ export class UserService {
         user.save()
         return user
     }
-    async addPokemon(id: ObjectId, idPokemon: string){
+    async addPokemon(id: ObjectId, idPokemon: string): Promise<User>{
         const user = await this.userModel.findById(id);
         if(user.arrPokemons.findIndex(pokemon => pokemon === idPokemon) === -1){
             user.arrPokemons.push(idPokemon);
@@ -83,7 +83,7 @@ export class UserService {
         }
 
     }
-    async removePokemon(id: ObjectId, idPokemon: string){
+    async removePokemon(id: ObjectId, idPokemon: string): Promise<User>{
         const user = await this.userModel.findById(id);
         const index = user.arrPokemons.findIndex(pokemon => pokemon === idPokemon)
         if(index !== -1){
@@ -92,7 +92,7 @@ export class UserService {
             return user;
         }
     }
-    async setPotions(id: ObjectId, potion: Potions){
+    async setPotions(id: ObjectId, potion: Potions): Promise<User>{
         const user = await this.userModel.findById(id);
         const indexPotion = user.arrPotions.findIndex(item => item.id === potion.id);
         if(indexPotion !== -1) {
@@ -105,7 +105,7 @@ export class UserService {
         return user
     }
 
-    async changeStage(id: ObjectId, stage: number){
+    async changeStage(id: ObjectId, stage: number): Promise<User>{
         const user = await this.userModel.findById(id);
         user.stageInOfflineArena = stage;
         user.save();
@@ -117,13 +117,13 @@ export class UserService {
     user.save()
     return user
     }
-    async changeCountOfMoney(id: ObjectId, money: number){
+    async changeCountOfMoney(id: ObjectId, money: number): Promise<User>{
         const user = await this.userModel.findById(id);
         user.coins = money;
         user.save();
         return user
     }
-    async addAchivesById(id: ObjectId, index: number) {
+    async addAchivesById(id: ObjectId, index: number): Promise<User> {
         const user = await this.userModel.findById(id);
         if(user.arrAchives.findIndex(achive => achive === index) === -1){
             user.arrAchives.push(index);
