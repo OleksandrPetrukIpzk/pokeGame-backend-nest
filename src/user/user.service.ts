@@ -1,68 +1,69 @@
-import {Injectable} from "@nestjs/common";
+import {Injectable, UnauthorizedException} from "@nestjs/common";
 import {InjectModel} from "@nestjs/mongoose";
 import {Potions, User} from "./schemas/user.schema";
 import {Model, ObjectId} from "mongoose";
 import {CreateUserDto} from "./dto/create-user-dto";
-
-
+import { JwtService } from '@nestjs/jwt';
+import {INIT_USER} from "./constant/constant";
+import * as bcrypt from 'bcrypt';
 @Injectable()
 export class UserService {
-    constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+    constructor(@InjectModel(User.name) private userModel: Model<User>,
+                private readonly jwtService: JwtService
+                ) {}
 
     async create(dto: CreateUserDto): Promise<User>{
-        const initUser = {
-            img: 'https://www.shutterstock.com/image-vector/user-profile-icon-vector-avatar-600nw-2247726673.jpg',
-            selectedPokemon: '',
-            coins: 20,
-            rang: 0,
-            stageInOfflineArena: 1,
-            arrPokemons: [],
-            arrAchives: [],
-            arrPotions: [{id: 1, name:'Skip battle', count: 1}]
-
-        }
-        const isUnicalName = await this.userModel.findOne({'name': dto.name})
-        const isUnicalEmail = await this.userModel.findOne({'email': dto.email})
+        const isUnicalName = await this.userModel.findOne({name: dto.name})
+        const isUnicalEmail = await this.userModel.findOne({email: dto.email})
         if(isUnicalName === null && isUnicalEmail === null){
-            const user = await this.userModel.create({...dto, ...initUser})
+            const hashPassword = await bcrypt.hash(dto.password, 3)
+            const {password, ...result} = dto;
+            const user = await this.userModel.create({...result, password: hashPassword, ...INIT_USER})
             return user;
         }
 
     }
-
+    async logIn(dto: CreateUserDto): Promise<{
+        user: User,
+        access_token: string }> {
+        const user = await this.userModel.findOne({name: dto.name})
+        const isMatch = await bcrypt.compare(dto.password, user.password)
+        if(!isMatch){
+            throw new UnauthorizedException();
+        }
+        const payload = {sub: user._id, username: user.name}
+        const token = await this.jwtService.signAsync(payload)
+        return {
+            user,
+            access_token: token
+        }
+    }
     async delete(id: ObjectId): Promise<ObjectId>{
         const user = await this.userModel.findByIdAndDelete(id);
         return user.id
     }
     async changePassword(id: ObjectId, password: string): Promise<User> {
-        const user = await this.userModel.findByIdAndDelete(id);
-        user.password = password;
-        user.save()
+        const updatedPassword = {password: await bcrypt.hash(password, 3)};
+        const user = await this.userModel.findOneAndUpdate({_id: id}, updatedPassword);
         return user
     }
     async changeName(id: ObjectId, userName: string): Promise<User> {
-        const isUnicalName = await this.userModel.findOne({'name': userName})
+        const isUnicalName = await this.userModel.findOne({name: userName})
         if(isUnicalName === null){
-            const user = await this.userModel.findById(id);
-            user.name = userName;
-            user.save()
+            const user = await this.userModel.findOneAndUpdate({_id: id}, {name: userName});
             return user
         }
     }
     async changeEmail(id: ObjectId, email: string): Promise<User> {
-        const isUnicalUser = await this.userModel.findOne({'email': email});
+        const isUnicalUser = await this.userModel.findOne({email: email});
         if(isUnicalUser === null){
-            const user = await this.userModel.findById(id);
-            user.name = email;
-            user.save()
+            const user = await this.userModel.findOneAndUpdate({_id: id}, {email});
             return user
         }
 
     }
     async changeImg(id: ObjectId, img: string): Promise<User> {
-        const user = await this.userModel.findById(id);
-        user.name = img;
-        user.save()
+        const user = await this.userModel.findOneAndUpdate({_id: id}, {img});
         return user
     }
     async changeRangById(id: ObjectId, rang: number): Promise<User>{
@@ -106,21 +107,15 @@ export class UserService {
     }
 
     async changeStage(id: ObjectId, stage: number): Promise<User>{
-        const user = await this.userModel.findById(id);
-        user.stageInOfflineArena = stage;
-        user.save();
+        const user = await this.userModel.findOneAndUpdate({_id: id}, {stageInOfflineArena: stage});
         return user
     }
     async changeCurrentPokemonById(id: ObjectId, pokemonId: string): Promise<User>{
-    const user = await this.userModel.findById(id);
-    user.selectedPokemon = pokemonId;
-    user.save()
+    const user = await this.userModel.findOneAndUpdate({_id: id}, {selectedPokemon: pokemonId});
     return user
     }
     async changeCountOfMoney(id: ObjectId, money: number): Promise<User>{
-        const user = await this.userModel.findById(id);
-        user.coins = money;
-        user.save();
+        const user = await this.userModel.findOneAndUpdate({_id: id}, {coins: money});
         return user
     }
     async addAchivesById(id: ObjectId, index: number): Promise<User> {
