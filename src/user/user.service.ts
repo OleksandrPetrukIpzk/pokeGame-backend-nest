@@ -12,14 +12,19 @@ export class UserService {
                 private readonly jwtService: JwtService
                 ) {}
 
-    async create(dto: CreateUserDto): Promise<User>{
+    async create(dto: CreateUserDto): Promise<{user: User, access_token: string }>{
         const isUnicalName = await this.userModel.findOne({name: dto.name})
         const isUnicalEmail = await this.userModel.findOne({email: dto.email})
         if(isUnicalName === null && isUnicalEmail === null){
             const hashPassword = await bcrypt.hash(dto.password, 3)
             const {password, ...result} = dto;
             const user = await this.userModel.create({...result, password: hashPassword, ...INIT_USER})
-            return user;
+            const payload = {sub: user._id, username: user.name}
+            const token = await this.jwtService.signAsync(payload)
+            return {
+                user,
+                access_token: token
+            }
         }
 
     }
@@ -43,27 +48,35 @@ export class UserService {
         return user.id
     }
     async changePassword(id: ObjectId, password: string): Promise<User> {
-        const updatedPassword = {password: await bcrypt.hash(password, 3)};
-        const user = await this.userModel.findOneAndUpdate({_id: id}, updatedPassword);
+        const updatedPassword: string = await bcrypt.hash(password, 3);
+        const user = await this.userModel.findById(id);
+        user.password = updatedPassword;
+        user.save()
         return user
     }
     async changeName(id: ObjectId, userName: string): Promise<User> {
         const isUnicalName = await this.userModel.findOne({name: userName})
         if(isUnicalName === null){
-            const user = await this.userModel.findOneAndUpdate({_id: id}, {name: userName});
+            const user = await this.userModel.findById(id);
+            user.name = userName;
+            user.save()
             return user
         }
     }
     async changeEmail(id: ObjectId, email: string): Promise<User> {
         const isUnicalUser = await this.userModel.findOne({email: email});
         if(isUnicalUser === null){
-            const user = await this.userModel.findOneAndUpdate({_id: id}, {email});
+            const user = await this.userModel.findById(id);
+            user.email = email;
+            user.save()
             return user
         }
 
     }
     async changeImg(id: ObjectId, img: string): Promise<User> {
-        const user = await this.userModel.findOneAndUpdate({_id: id}, {img});
+        const user = await this.userModel.findById(id);
+        user.img = img;
+        user.save();
         return user
     }
     async changeRangById(id: ObjectId, rang: number): Promise<User>{
@@ -107,15 +120,21 @@ export class UserService {
     }
 
     async changeStage(id: ObjectId, stage: number): Promise<User>{
-        const user = await this.userModel.findOneAndUpdate({_id: id}, {stageInOfflineArena: stage});
+        const user = await this.userModel.findById(id);
+        user.stageInOfflineArena = stage;
+        user.save();
         return user
     }
     async changeCurrentPokemonById(id: ObjectId, pokemonId: string): Promise<User>{
-    const user = await this.userModel.findOneAndUpdate({_id: id}, {selectedPokemon: pokemonId});
+        const user = await this.userModel.findById(id);
+    user.selectedPokemon = pokemonId;
+    user.save();
     return user
     }
     async changeCountOfMoney(id: ObjectId, money: number): Promise<User>{
-        const user = await this.userModel.findOneAndUpdate({_id: id}, {coins: money});
+        const user = await this.userModel.findById(id);
+        user.coins = money;
+        user.save();
         return user
     }
     async addAchivesById(id: ObjectId, index: number): Promise<User> {
@@ -131,7 +150,7 @@ export class UserService {
         const users = await this.userModel.find()
         const usersWithPokemons: User[] = []
         users.map((user) => {
-            if(user.selectedPokemon !== '' && user.rang > 0){
+            if(user.selectedPokemon !== '' && user.rang >= 0){
                 usersWithPokemons.push(user);
             }
         })

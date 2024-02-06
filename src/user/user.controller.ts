@@ -12,7 +12,7 @@ export class UserController{
     constructor(private readonly userService: UserService,) {
     }
     @Post()
-     create(@Body() dto: CreateUserDto): Promise<User>{
+     create(@Body() dto: CreateUserDto): Promise<{ user:User, access_token: string }>{
     return this.userService.create(dto)
     }
     @Post('/login')
@@ -63,7 +63,7 @@ export class UserController{
         return this.userService.removePokemon(id, idPokemon)
     }
     @UseGuards(AuthGuard)
-    @Post('/removePokemon/:id')
+    @Post('/setPotion/:id')
      setPotions(@Param('id') id: ObjectId, @Body() {potion}: {potion: Potions}) : Promise<User>{
         return this.userService.setPotions(id, potion)
     }

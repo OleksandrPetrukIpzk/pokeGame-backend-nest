@@ -16,7 +16,7 @@ export class RangController{
         return this.rangService.getAllFights()
     }
     @UseGuards(AuthGuard)
-    @Get()
+    @Get('/userFights/')
      getFightForUserByName(@Body() {name}: { name: string }): Promise<Rang[]> {
         return this.rangService.getFightForUserByName(name)
     }
