@@ -94,7 +94,6 @@ export class UserController{
      getAll(): Promise<User[]> {
         return this.userService.getAll()
     }
-    @UseGuards(AuthGuard)
     @Get(':id')
      getUserById(@Param('id') id: ObjectId): Promise<User> {
         return this.userService.getUserById(id)
