@@ -3,6 +3,7 @@ import {CreateRangDto} from "./dto/create-rang-dto";
 import {InjectModel} from "@nestjs/mongoose";
 import {Model} from "mongoose";
 import {Rang} from "./schemas/rang.schema";
+import {CreateUserDto} from "../user/dto/create-user-dto";
 
 @Injectable()
 export class RangService{
@@ -16,19 +17,18 @@ export class RangService{
     }
     async getFightForUserByName(name: string): Promise<Rang[]> {
         const userFightStart = await this.rangModel.find({whoStart: name});
-        const userFightDefense = await  this.rangModel.find({whoDefense: name})
-        const allInfo = userFightStart.concat(userFightDefense);
+        const userFightDefense = await  this.rangModel.find({whoDefence: name})
+            const allInfo = userFightStart.concat(userFightDefense);
         allInfo.sort((a, b) =>{
-            return a.timeFight.getTime() - b.timeFight.getTime()
+            return b.timeFight.getTime() - a.timeFight.getTime()
         })
         return allInfo
     }
 
-    async setFight(dto: CreateRangDto): Promise<Rang>{
-        const fight = await this.rangModel.create({...dto,
+    async setFight(dto: any): Promise<Rang>{
+        const fight = await this.rangModel.create({...dto.user,
             timeFight: new Date()
     });
         return fight
-
     }
 }

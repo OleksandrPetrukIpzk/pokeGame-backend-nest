@@ -116,7 +116,7 @@ export class UserService {
     }
     async changeRangById(id: ObjectId, rang: number): Promise<User>{
         const user = await this.userModel.findById(id);
-        if(user.rang === 0){
+        if(user.rang === 0 && rang < 0){
             return user
         }
         user.rang = rang;

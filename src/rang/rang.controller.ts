@@ -1,4 +1,4 @@
-import {Body, Controller, Get, Post, UseGuards} from "@nestjs/common";
+import {Body, Controller, Get, Param, Post, UseGuards} from "@nestjs/common";
 import {RangService} from "./rang.service";
 import {CreateRangDto} from "./dto/create-rang-dto";
 import {Rang} from "./schemas/rang.schema";
@@ -16,13 +16,13 @@ export class RangController{
         return this.rangService.getAllFights()
     }
     @UseGuards(AuthGuard)
-    @Get('/userFights/')
-     getFightForUserByName(@Body() {name}: { name: string }): Promise<Rang[]> {
+    @Get('/userFights/:name')
+     getFightForUserByName(@Param('name') name: string ): Promise<Rang[]> {
         return this.rangService.getFightForUserByName(name)
     }
     @UseGuards(AuthGuard)
     @Post()
-     setFight(@Body() dto: CreateRangDto): Promise<Rang> {
+     setFight(@Body() dto:  CreateRangDto ): Promise<Rang> {
         return this.rangService.setFight(dto)
     }
 }

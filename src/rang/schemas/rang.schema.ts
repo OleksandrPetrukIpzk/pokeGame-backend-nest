@@ -13,7 +13,7 @@ export class Rang {
     whoStart: string;
 
     @Prop()
-    whoDefense: string;
+    whoDefence: string;
 
     @Prop()
     whoWin: string;
