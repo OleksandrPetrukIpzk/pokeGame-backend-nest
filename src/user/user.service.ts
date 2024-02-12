@@ -1,4 +1,4 @@
-import {Injectable, UnauthorizedException} from "@nestjs/common";
+import {HttpException, HttpStatus, Injectable, UnauthorizedException} from "@nestjs/common";
 import {InjectModel} from "@nestjs/mongoose";
 import {Potions, User} from "./schemas/user.schema";
 import {Model, ObjectId} from "mongoose";
@@ -15,6 +15,18 @@ export class UserService {
     async create(dto: CreateUserDto): Promise<{user: User, access_token: string }>{
         const isUnicalName = await this.userModel.findOne({name: dto.name})
         const isUnicalEmail = await this.userModel.findOne({email: dto.email})
+        if(isUnicalName){
+            throw new HttpException({
+                status: HttpStatus.NOT_ACCEPTABLE,
+                error: 'This name is used',
+            }, HttpStatus.NOT_ACCEPTABLE);
+        }
+        if(isUnicalEmail){
+            throw new HttpException({
+                status: HttpStatus.NOT_ACCEPTABLE,
+                error: 'This email is used',
+            }, HttpStatus.NOT_ACCEPTABLE);
+        }
         if(isUnicalName === null && isUnicalEmail === null){
             const hashPassword = await bcrypt.hash(dto.password, 3)
             const {password, ...result} = dto;
@@ -31,16 +43,27 @@ export class UserService {
     async logIn(dto: CreateUserDto): Promise<{
         user: User,
         access_token: string }> {
-        const user = await this.userModel.findOne({name: dto.name})
-        const isMatch = await bcrypt.compare(dto.password, user.password)
-        if(!isMatch){
-            throw new UnauthorizedException();
+        try{
+            const user = await this.userModel.findOne({name: dto.name});
+            const isMatch = await bcrypt.compare(dto.password, user.password)
+            if(!isMatch){
+                throw new HttpException({
+                    status: HttpStatus.NOT_ACCEPTABLE,
+                    error: 'Wrong password',
+                }, HttpStatus.NOT_ACCEPTABLE);
+            }
+            const payload = {sub: user._id, username: user.name}
+            const token = await this.jwtService.signAsync(payload)
+            return {
+                user,
+                access_token: token
+            }
         }
-        const payload = {sub: user._id, username: user.name}
-        const token = await this.jwtService.signAsync(payload)
-        return {
-            user,
-            access_token: token
+        catch (e){
+            throw new HttpException({
+                status: HttpStatus.NOT_ACCEPTABLE,
+                error: 'Wrong credentials',
+            }, HttpStatus.NOT_ACCEPTABLE);
         }
     }
     async delete(id: ObjectId): Promise<ObjectId>{
