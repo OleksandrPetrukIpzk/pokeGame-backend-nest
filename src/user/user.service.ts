@@ -79,6 +79,12 @@ export class UserService {
     }
     async changeName(id: ObjectId, userName: string): Promise<User> {
         const isUnicalName = await this.userModel.findOne({name: userName})
+        if(isUnicalName){
+            throw new HttpException({
+                status: HttpStatus.NOT_ACCEPTABLE,
+                error: 'This name is used',
+            }, HttpStatus.NOT_ACCEPTABLE);
+        }
         if(isUnicalName === null){
             const user = await this.userModel.findById(id);
             user.name = userName;
@@ -88,6 +94,12 @@ export class UserService {
     }
     async changeEmail(id: ObjectId, email: string): Promise<User> {
         const isUnicalUser = await this.userModel.findOne({email: email});
+        if(isUnicalUser){
+            throw new HttpException({
+                status: HttpStatus.NOT_ACCEPTABLE,
+                error: 'This email is used',
+            }, HttpStatus.NOT_ACCEPTABLE);
+        }
         if(isUnicalUser === null){
             const user = await this.userModel.findById(id);
             user.email = email;
