@@ -64,7 +64,7 @@ export class UserController{
     }
     @UseGuards(AuthGuard)
     @Post('/setPotion/:id')
-     setPotions(@Param('id') id: ObjectId, @Body() {potion}: {potion: Potions}) : Promise<User>{
+     setPotions(@Param('id') id: ObjectId, @Body() {potion}: {potion: Potions[]}) : Promise<User>{
         return this.userService.setPotions(id, potion)
     }
     @UseGuards(AuthGuard)

@@ -141,16 +141,9 @@ export class UserService {
             return user;
         }
     }
-    async setPotions(id: ObjectId, potion: Potions): Promise<User>{
+    async setPotions(id: ObjectId, potion: Potions[]): Promise<User>{
         const user = await this.userModel.findById(id);
-        const indexPotion = user.arrPotions.findIndex(item => item.id === potion.id);
-        if(indexPotion !== -1) {
-            const count = user.arrPotions[indexPotion].count + 1;
-            user.arrPotions[indexPotion].count = count;
-        }
-        else{
-            user.arrPotions.push(potion);
-        }
+        user.arrPotions = potion;
         user.markModified('arrPotions');
         await user.save();
         return user
