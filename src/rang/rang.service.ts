@@ -1,9 +1,7 @@
 import {Injectable} from "@nestjs/common";
-import {CreateRangDto} from "./dto/create-rang-dto";
 import {InjectModel} from "@nestjs/mongoose";
 import {Model} from "mongoose";
 import {Rang} from "./schemas/rang.schema";
-import {CreateUserDto} from "../user/dto/create-user-dto";
 
 @Injectable()
 export class RangService{
@@ -24,7 +22,6 @@ export class RangService{
         })
         return allInfo
     }
-
     async setFight(dto: any): Promise<Rang>{
         const fight = await this.rangModel.create({...dto.user,
             timeFight: new Date()

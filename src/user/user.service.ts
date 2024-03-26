@@ -38,14 +38,20 @@ export class UserService {
                 access_token: token
             }
         }
-
     }
     async logIn(dto: CreateUserDto): Promise<{
         user: User,
         access_token: string }> {
         try{
             const user = await this.userModel.findOne({name: dto.name});
-            const isMatch = await bcrypt.compare(dto.password, user.password)
+            const isMatch = await bcrypt.compare(dto.password, user.password);
+            const isTrueEmail = user.email === dto.email;
+            if(!isTrueEmail){
+                throw new HttpException({
+                    status: HttpStatus.NOT_ACCEPTABLE,
+                    error: 'Wrong email',
+                }, HttpStatus.NOT_ACCEPTABLE);
+            }
             if(!isMatch){
                 throw new HttpException({
                     status: HttpStatus.NOT_ACCEPTABLE,
@@ -106,7 +112,6 @@ export class UserService {
             user.save()
             return user
         }
-
     }
     async changeImg(id: ObjectId, img: string): Promise<User> {
         const user = await this.userModel.findById(id);
@@ -130,7 +135,6 @@ export class UserService {
             user.save();
             return user;
         }
-
     }
     async removePokemon(id: ObjectId, idPokemon: string): Promise<User>{
         const user = await this.userModel.findById(id);
@@ -148,7 +152,6 @@ export class UserService {
         await user.save();
         return user
     }
-
     async changeStage(id: ObjectId, stage: number): Promise<User>{
         const user = await this.userModel.findById(id);
         user.stageInOfflineArena = stage;
@@ -175,7 +178,6 @@ export class UserService {
             return user
         }
     }
-
     async getAll(): Promise<User[]> {
         const users = await this.userModel.find()
         const usersWithPokemons: User[] = []
@@ -186,12 +188,8 @@ export class UserService {
         })
         return usersWithPokemons
     }
-
-
     async getUserById(id: ObjectId): Promise<User> {
         const user = await this.userModel.findById(id);
         return user
     }
-
-
 }
